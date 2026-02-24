@@ -1,3 +1,5 @@
+# 01_elt_pipeline.py
+# snowflake를 이용해서 ELT 파이프라인을 구축하는 코드
 import os
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
