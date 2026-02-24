@@ -1,13 +1,7 @@
 # NY Taxi Data ETL with Snowflake
 
 2024년 뉴욕 택시 데이터를 Snowflake 데이터 웨어하우스에 로드, 변환, 검증하는 자동화 ETL 파이프라인입니다.
-
-## 📋 목차
-- [프로젝트 개요](#프로젝트-개요)
-- [설치 및 설정](#설치-및-설정)
-- [사용 방법](#사용-방법)
-- [Snowflake 아키텍처](#snowflake-아키텍처)
-- [데이터 변환 프로세스](#데이터-변환-프로세스)
+2026 Data Engineering Zoomcamp 3주차 HW 과정에서, 수업 내용에서 사용한 BigQuery가 아닌 Snowflake를 자체적으로 활용한 개인 학습용 프로젝트 입니다.
 
 ## 🎯 프로젝트 개요
 
@@ -19,6 +13,33 @@
 4. **데이터 변환**: 날짜/금액 형식 표준화
 5. **검증 및 승인**: 데이터 샘플 & 통계 확인 후 수동 승인
 6. **최종 저장**: 정규화된 테이블에 저장
+
+## 🏗️ Snowflake 아키텍처
+
+<img width="1650" height="526" alt="diagram-export-2026 -2 -24 -오후-3_17_21" src="https://github.com/user-attachments/assets/99fe2faa-5f13-4bbd-8cc2-558b09a0489b" />
+
+
+### 데이터베이스 구조
+
+```
+SNOWFLAKE
+└── NY_TAXI (DATABASE)
+    └── TRIPDATA (SCHEMA)
+        ├── my_local_stage (STAGE)
+        │   └── [Parquet 파일들]
+        ├── yellow_tripdata_raw (임시 테이블)
+        └── yellow_tripdata_2024 (최종 테이블)
+```
+
+### 주요 객체
+
+| 객체 | 용도 |
+|------|------|
+| `my_parquet_format` | Parquet 파일 형식 정의 |
+| `my_local_stage` | 로컬 Parquet 파일 스테이징 |
+| `yellow_tripdata_raw` | RAW 데이터 임시 저장소 |
+| `yellow_tripdata_2024` | 변환된 최종 데이터 |
+
 
 ## 🔧 설치 및 설정
 
@@ -87,31 +108,6 @@ uv run python upload_data.py
    ```
    🎉 변환 및 저장 완료! yellow_tripdata_2024 테이블 저장됨
    ```
-
-## 🏗️ Snowflake 아키텍처
-
-
-
-### 데이터베이스 구조
-
-```
-SNOWFLAKE
-└── NY_TAXI (DATABASE)
-    └── TRIPDATA (SCHEMA)
-        ├── my_local_stage (STAGE)
-        │   └── [Parquet 파일들]
-        ├── yellow_tripdata_raw (임시 테이블)
-        └── yellow_tripdata_2024 (최종 테이블)
-```
-
-### 주요 객체
-
-| 객체 | 용도 |
-|------|------|
-| `my_parquet_format` | Parquet 파일 형식 정의 |
-| `my_local_stage` | 로컬 Parquet 파일 스테이징 |
-| `yellow_tripdata_raw` | RAW 데이터 임시 저장소 |
-| `yellow_tripdata_2024` | 변환된 최종 데이터 |
 
 ## 🔄 데이터 변환 프로세스
 
@@ -230,4 +226,4 @@ FROM yellow_tripdata_2024
 
 ## 📝 라이선스
 
-개인 학습 프로젝트
+- 2026 Data Engineering Zoomcamp 3주차 HW 과정에서, 수업 내용에서 사용한 BigQuery가 아닌 Snowflake를 자체적으로 활용한 개인 학습용 프로젝트 입니다.
