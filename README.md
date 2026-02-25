@@ -14,10 +14,15 @@
 5. **검증 및 승인**: 데이터 샘플 & 통계 확인 후 수동 승인
 6. **최종 저장**: 정규화된 테이블에 저장
 
-## 🏗️ Snowflake 아키텍처
+## 아키텍처
+
+### 파일 구조
+- snowflake_python: snowflake에 파일을 적재/변환/조회하는 python 코드 - 로컬에서 실행
+- snowflake_sql: 주차별 homework를 해결하기 위해 사용한 sql 코드 - snowflake 클라우드에서 실행
+
+### 🏗️ Snowflake 아키텍처
 
 <img width="1650" height="526" alt="diagram-export-2026 -2 -24 -오후-3_17_21" src="https://github.com/user-attachments/assets/99fe2faa-5f13-4bbd-8cc2-558b09a0489b" />
-
 
 ### 데이터베이스 구조
 
