@@ -1,6 +1,9 @@
+# Data directory
+data/
 .env
 .venv/
 .DS_Store
 __pycache__/
 *.parquet
 .vscode/
+*.duckdb

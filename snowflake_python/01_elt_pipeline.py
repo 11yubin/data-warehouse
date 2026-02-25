@@ -1,6 +1,7 @@
 # 01_elt_pipeline.py
 # snowflake를 이용해서 ELT 파이프라인을 구축하는 코드
 import os
+import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 import snowflake.connector
@@ -18,8 +19,23 @@ if not all([SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_ACCOUNT]):
     raise ValueError("❌ .env 파일에 접속 정보가 없거나 읽지 못했습니다!")
 
 DOWNLOAD_DIR = "./data"
-BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-"
-MONTHS = [f"{i:02d}" for i in range(1, 7)]
+BASE_URL_TEMPLATE = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year}-"
+MONTHS = [f"{i:02d}" for i in range(1, 13)]
+
+def get_year_from_cli():
+    """CLI에서 연도 입력받기"""
+    if len(sys.argv) > 1:
+        try:
+            year = int(sys.argv[1])
+            if year < 2000 or year > 2030:
+                raise ValueError("연도는 2000~2030 사이여야 합니다.")
+            return year
+        except ValueError as e:
+            print(f"❌ 잘못된 입력: {e}")
+            sys.exit(1)
+    else:
+        print("⚠️  연도를 입력해주세요: python 01_elt_pipeline.py <연도>")
+        sys.exit(1)
 
 def get_snowflake_conn():
     return snowflake.connector.connect(
@@ -29,9 +45,9 @@ def get_snowflake_conn():
         warehouse='COMPUTE_WH'
     )
 
-def download_file(month):
-    url = f"{BASE_URL}{month}.parquet"
-    file_path = os.path.join(DOWNLOAD_DIR, f"yellow_tripdata_2024-{month}.parquet")
+def download_file(month, year, base_url):
+    url = f"{base_url}{month}.parquet"
+    file_path = os.path.join(DOWNLOAD_DIR, f"yellow_tripdata_{year}-{month}.parquet")
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     
     # 이미 파일 있으면 다운로드 스킵
@@ -48,9 +64,13 @@ def download_file(month):
         return None
 
 def main():
+    # CLI에서 연도 입력받기
+    year = get_year_from_cli()
+    base_url = BASE_URL_TEMPLATE.format(year=year)
+    
     conn = None
     try:
-        print("🔌 Connecting to Snowflake...")
+        print(f"🔌 Connecting to Snowflake... (Year: {year})")
         conn = get_snowflake_conn()
         cur = conn.cursor()
         
@@ -64,7 +84,7 @@ def main():
         # 2. 파일 다운로드 & 업로드
         print("🚀 Checking & Uploading files...")
         with ThreadPoolExecutor(max_workers=4) as executor:
-            files = list(executor.map(download_file, MONTHS))
+            files = list(executor.map(lambda month: download_file(month, year, base_url), MONTHS))
         
         valid_files = [f for f in files if f]
         for f in valid_files:
@@ -93,8 +113,9 @@ def main():
         # 4. [2단계 - Transform] 변환해서 진짜 테이블 생성 (CTAS)
         
         print("✨ Transforming data & Creating Final Table...")
-        cur.execute("""
-            CREATE OR REPLACE TABLE yellow_tripdata_2024 AS
+        table_name = f"yellow_tripdata_{year}"
+        cur.execute(f"""
+            CREATE OR REPLACE TABLE {table_name} AS
             SELECT
                 -- 1. 날짜 변환 (마이크로초 -> 타임스탬프)
                 -- (주의: 컬럼명은 쿼리 호환성을 위해 원본 이름 그대로 유지하는 게 좋음)
@@ -114,18 +135,18 @@ def main():
         print("\n✅ 변환 검증 중...")
         
         # 5-1. 총 레코드 수 확인
-        cur.execute("SELECT COUNT(*) FROM yellow_tripdata_2024")
+        cur.execute(f"SELECT COUNT(*) FROM {table_name}")
         count = cur.fetchone()[0]
         print(f"   📊 총 데이터: {count:,} 건")
         
         # 5-2. 데이터 샘플 확인 (날짜 & 금액이 제대로 변환되었는지)
-        cur.execute("""
+        cur.execute(f"""
             SELECT 
                 "tpep_pickup_datetime", 
                 "tpep_dropoff_datetime",
                 "fare_amount",
                 "total_amount" 
-            FROM yellow_tripdata_2024 LIMIT 3
+            FROM {table_name} LIMIT 3
         """)
         samples = cur.fetchall()
         print(f"   📋 샘플 데이터 (처음 3건):")
@@ -133,14 +154,14 @@ def main():
             print(f"      - Pickup: {row[0]}, Dropoff: {row[1]}, Fare: ${row[2]:.2f}, Total: ${row[3]:.2f}")
         
         # 5-3. 데이터 타입 & 통계 확인
-        cur.execute("""
+        cur.execute(f"""
             SELECT 
                 COUNT(*) as total_rows,
                 COUNT(DISTINCT DATE("tpep_pickup_datetime")) as unique_dates,
                 MIN("total_amount") as min_amount,
                 MAX("total_amount") as max_amount,
                 AVG("total_amount") as avg_amount
-            FROM yellow_tripdata_2024
+            FROM {table_name}
         """)
         stats = cur.fetchone()
         print(f"\n   📈 데이터 통계:")
@@ -167,7 +188,7 @@ def main():
         
         # 7. 최종 저장 확인
         print("-" * 50)
-        print(f"🎉 변환 및 저장 완료! yellow_tripdata_2024 테이블 저장됨")
+        print(f"🎉 변환 및 저장 완료! {table_name} 테이블 저장됨")
         print("-" * 50)
         
     except Exception as e:
