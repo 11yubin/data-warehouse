@@ -17,7 +17,7 @@
 ## 아키텍처
 
 ### 파일 구조
-- snowflake_python: snowflake에 파일을 적재/변환/조회하는 python 코드 - 로컬에서 실행
+- snowflake_python: snowflake에 파일을 적재/변환/조회하는 python 스크립트 - 로컬에서 실행
 - snowflake_sql: 주차별 homework를 해결하기 위해 사용한 sql 코드 - snowflake 클라우드에서 실행
 
 ### 🏗️ Snowflake 아키텍처
