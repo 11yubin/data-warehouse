@@ -1,0 +1,34 @@
+# 테스트 문서화
+version: 2
+
+models:
+  - name: dim_zones
+    description: "Taxi zones lookup table containing LocationID, borough, and zone names."
+    columns:
+      - name: locationid
+        description: "Primary key for taxi zones."
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_trips
+    description: >
+      Final fact table containing unioned yellow and green taxi trip data 
+      enriched with zone information.
+    columns:
+      - name: trip_id
+        description: "Unique identifier for each trip, generated via surrogate key."
+        tests:
+          - unique
+          - not_null
+      - name: service_type
+        description: "Type of taxi service (Green or Yellow)."
+        tests:
+          - accepted_values:
+              values: ['Green', 'Yellow']
+      - name: pickup_location_id
+        description: "Location ID where the trip started."
+        tests:
+          - relationships:
+              to: ref('dim_zones')
+              field: locationid

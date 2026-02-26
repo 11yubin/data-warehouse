@@ -7,4 +7,12 @@ __pycache__/
 *.parquet
 .vscode/
 *.duckdb
-.dbt/
+
+*.csv
+# dbt
+target/
+dbt_packages/
+logs/
+
+# 환경 설정 (민감 정보)
+profiles.yml

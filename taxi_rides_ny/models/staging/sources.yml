@@ -1,0 +1,20 @@
+# row data가 snowflake의 어느 곳에 위치해 있는지 dbt에게 알려주는 파일
+# 신선도 검사 코드는 최신 파일인 경우에만 사용. 해당 프로젝트에서는 19~20 파일을 사용하였기 때문에 주석처리
+version: 2
+
+sources:
+  - name: staging
+    database: NY_TAXI
+    schema: TRIPDATA
+    tables:
+      - name: green_tripdata
+        # loaded_at_field: lpep_pickup_datetime
+        # freshness:
+        #   warn_after: {count: 6, period: hour}
+        #   error_after: {count: 12, period: hour}
+
+      - name: yellow_tripdata
+        # loaded_at_field: tpep_pickup_datetime
+        # freshness:
+        #   warn_after: {count: 6, period: hour}
+        #   error_after: {count: 12, period: hour}

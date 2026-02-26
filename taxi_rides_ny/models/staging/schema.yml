@@ -1,0 +1,46 @@
+# 테스트 문서화
+version: 2
+
+unit_tests:
+  - name: test_payment_type_mapping
+    model: stg_green_tripdata
+    given:
+      - input: source('staging', 'green_tripdata')
+        rows:
+          - {vendorid: 1, payment_type: 1, pulocationid: 1, dolocationid: 1,
+             tpep_pickup_datetime: '2021-01-01', tpep_dropoff_datetime: '2021-01-01',
+             fare_amount: 10, ratecodeid: 1}
+          - {vendorid: 1, payment_type: 2, pulocationid: 1, dolocationid: 1,
+             tpep_pickup_datetime: '2021-01-01', tpep_dropoff_datetime: '2021-01-01',
+             fare_amount: 10, ratecodeid: 1}
+    expect:
+      rows:
+        - {payment_type_description: 'Credit card'}
+        - {payment_type_description: 'Cash'}
+        
+models:
+  - name: stg_green_tripdata
+    columns:
+      - name: vendor_id
+        tests:
+          - accepted_values:
+              values: [1, 2, 4]
+              severity: warn
+      - name: payment_type
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6]
+              severity: warn
+
+  - name: stg_yellow_tripdata
+    columns:
+      - name: vendor_id
+        tests:
+          - accepted_values:
+              values: [1, 2, 4]
+              severity: warn
+      - name: payment_type
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6]
+              severity: warn
