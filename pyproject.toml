@@ -12,5 +12,6 @@ dependencies = [
     "duckdb>=1.4.4",
     "pandas>=3.0.0",
     "pyarrow>=23.0.0",
+    "pyspark>=4.1.1",
     "snowflake-connector-python>=4.2.0",
 ]

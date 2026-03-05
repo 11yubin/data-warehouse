@@ -13,6 +13,8 @@ __pycache__/
 target/
 dbt_packages/
 logs/
+yellow_oct_2025_repartitioned/
 
 # 환경 설정 (민감 정보)
 profiles.yml
+.bruin.yml
